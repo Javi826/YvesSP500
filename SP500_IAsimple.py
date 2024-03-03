@@ -56,11 +56,10 @@ df_data_clean = mod_dtset_clean(df_data,start_date,endin_date)
 filter_start_date = '2000-01-01'
 filter_endin_date = '2018-12-31'
 df_preprocessing = mod_preprocessing(df_data_clean,filter_start_date,filter_endin_date)
-#df_preprocessing.info()
-weights = class_weight(df_preprocessing)
 
 #DATA NORMALIZATION
 #------------------------------------------------------------------------------
+weights = class_weight(df_preprocessing)
 scaler = StandardScaler()
 lag_columns = df_preprocessing.columns[df_preprocessing.columns.str.startswith('lag')]
 df_preprocessing[lag_columns] = scaler.fit_transform(df_preprocessing[lag_columns])

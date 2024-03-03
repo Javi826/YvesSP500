@@ -9,6 +9,12 @@ from columns.columns import *
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import random
+import tensorflow as tf
+from keras.layers import SimpleRNN, LSTM, Dense,Dropout
+from keras.models import Sequential
+
+lags = 5 
 
 def day_week(df_data_clean):
        
@@ -70,12 +76,57 @@ def filter_data_by_date_range(df, filter_start_date, filter_endin_date):
         
     return df[(df['date'] >= filter_start_date) & (df['date'] <= filter_endin_date)]
 
+def set_seeds(seed=100):
+    random.seed(seed)
+    np.random.seed(seed)
+    tf.random.set_seed(seed)
+
 def class_weight(df_preprocessing):
     
     c0, c1 = np.bincount(df_preprocessing['direction'])
     w0 = (1/c0) * (len(df_preprocessing)) / 2
     w1 = (1/c1) * (len(df_preprocessing)) / 2
     return {0: w0, 1:w1}
+
+def create_deep_rnn_model(hl=2, hu=100, layer='SimpleRNN',
+                          optimizer='rmsprop', features=1,
+                          dropout=False, rate=0.3, seed=100, lags=5):
+    if hl <= 2:
+        hl = 2
+    if layer == 'SimpleRNN':
+        layer = SimpleRNN
+    else:
+        layer = LSTM
+    
+    model = Sequential()
+    model.add(layer(hu, input_shape=(lags, features), return_sequences=True))
+    
+    if dropout:
+        model.add(Dropout(rate, seed=seed))
+    
+    for _ in range(2, hl):
+        model.add(layer(hu, return_sequences=True))
+        if dropout:
+            model.add(Dropout(rate, seed=seed))
+    
+    model.add(layer(hu))
+    model.add(Dense(1, activation='sigmoid'))
+    model.compile(optimizer=optimizer,
+                  loss='binary_crossentropy',
+                  metrics=['accuracy'])
+    
+    return model
+
+
+
+
+
+
+
+
+
+
+
 
 
 def df_plots(x, y, x_label, y_label,plot_style):
