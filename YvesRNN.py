@@ -99,41 +99,44 @@ features=1
 set_seeds()
 
 dropout_values = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-#df_results = pd.DataFrame(columns=['Dropout', 'Accuracy', 'Precision', 'Recall', 'F1-Score', 'AUC-ROC'])
+neurons_values = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+
 df_results = []
 
 for dropout_rate in dropout_values:
-    print(f"Training model starts for Dropout = {dropout_rate}")
+    for num_neurons in neurons_values:
+        print(f"Training model starts for Dropout = {dropout_rate} and Neurons = {num_neurons}")
 
-    model = Sequential()
-    model.add(SimpleRNN(50, input_shape=(lags, features), return_sequences=True))
-    model.add(Dropout(dropout_rate))
-    model.add(SimpleRNN(50))
-    model.add(Dense(1, activation='sigmoid'))
-    model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['accuracy'])
+        model = Sequential()
+        model.add(SimpleRNN(num_neurons, input_shape=(lags, features), return_sequences=True))
+        model.add(Dropout(dropout_rate))
+        model.add(SimpleRNN(num_neurons))
+        model.add(Dense(1, activation='sigmoid'))
+        model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['accuracy'])
 
-    model.fit(X_df_lag_tr_nr_reshaped, y_train, epochs=50, verbose=0,
-              validation_data=(X_df_lag_ts_ns.values.reshape(-1, 5, 1), y_test))
+        model.fit(X_df_lag_tr_nr_reshaped, y_train, epochs=50, verbose=0,
+                  validation_data=(X_df_lag_ts_ns.values.reshape(-1, 5, 1), y_test))
 
-    #y_pred
-    y_pred = model.predict(X_df_lag_ts_ns.values.reshape(-1, 5, 1), batch_size=None)
-    y_pred_binary = (y_pred > 0.5).astype(int)
-    
-    accuracy = accuracy_score(y_test, y_pred_binary)
-    precision = precision_score(y_test, y_pred_binary)
-    recall = recall_score(y_test, y_pred_binary)
-    f1 = f1_score(y_test, y_pred_binary)
-    auc_roc = roc_auc_score(y_test, y_pred)
-    
-    df_results.append({'Dropout': dropout_rate,
-                            'Accuracy': accuracy,
-                            'Precision': precision,
-                            'Recall': recall,
-                            'F1-Score': f1,
-                            'AUC-ROC': auc_roc})
+        # y_pred
+        y_pred = model.predict(X_df_lag_ts_ns.values.reshape(-1, 5, 1), batch_size=None)
+        y_pred_binary = (y_pred > 0.5).astype(int)
 
-    print("Training model ending for Dropout =", dropout_rate)
-    print("-" * 54)  # Línea divisoria para mejorar la legibilidad en la salida
+        accuracy = accuracy_score(y_test, y_pred_binary)
+        precision = precision_score(y_test, y_pred_binary)
+        recall = recall_score(y_test, y_pred_binary)
+        f1 = f1_score(y_test, y_pred_binary)
+        auc_roc = roc_auc_score(y_test, y_pred)
+
+        df_results.append({'Dropout': dropout_rate,
+                           'Neurons': num_neurons,
+                           'Accuracy': accuracy,
+                           'Precision': precision,
+                           'Recall': recall,
+                           'F1-Score': f1,
+                           'AUC-ROC': auc_roc})
+
+        print(f"Training model ending for Dropout = {dropout_rate} and Neurons = {num_neurons}")
+        print('\n')
 
 
 df_results = pd.DataFrame(df_results)
