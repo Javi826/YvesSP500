@@ -1,19 +1,16 @@
 #DEEP RNN
-set_seeds()
-model = create_deep_rnn_model(
-            hl=2, hu=50, layer='SimpleRNN',
-            features=len(data.columns),
-            dropout=True, rate=0.3)
-
-model.summary()
-
-model.fit(g, epochs=200, steps_per_epoch=10,
-          verbose=False, class_weight=cw(train_y))
-
-y = np.where(model.predict(g_, batch_size=None) > 0.5,
-             1, 0).flatten()
-
-
-np.bincount(y)
-
-accuracy_score(test_y[lags:], y)
+#METRICS
+accuracy = accuracy_score(y_test.values, y_pred)
+print(f'Accuracy del modelo : {accuracy * 100:.2f}%')
+precision = precision_score(y_test, y_pred)
+print(f'Precisión del modelo: {precision * 100:.2f}%')
+recall = recall_score(y_test, y_pred)
+print(f'Recall del modelo   : {recall * 100:.2f}%')
+f1 = f1_score(y_test, y_pred)
+print(f'F1-Score del modelo : {f1 * 100:.2f}%')
+fpr, tpr, thresholds = roc_curve(y_test, y_pred)
+auc_roc = roc_auc_score(y_test, y_pred)
+print(f'AUC-ROC del modelo  : {auc_roc * 100:.2f}%')
+cm = confusion_matrix(y_test, y_pred)
+print('Matriz de Confusión :')
+print(cm)
