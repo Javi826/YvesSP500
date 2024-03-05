@@ -103,7 +103,7 @@ dropout_values = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 df_results = []
 
 for dropout_rate in dropout_values:
-    print(f"Entrenando modelo con dropout = {dropout_rate}")
+    print(f"Training model starts for Dropout = {dropout_rate}")
 
     model = Sequential()
     model.add(SimpleRNN(50, input_shape=(lags, features), return_sequences=True))
@@ -132,7 +132,7 @@ for dropout_rate in dropout_values:
                             'F1-Score': f1,
                             'AUC-ROC': auc_roc})
 
-    print("Training model for Dropout =", dropout_rate)
+    print("Training model ending for Dropout =", dropout_rate)
     print("-" * 54)  # Línea divisoria para mejorar la legibilidad en la salida
 
 

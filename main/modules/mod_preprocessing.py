@@ -7,7 +7,7 @@ from functions.def_functions import *
 from paths.paths import path_base,folder_preprocessing
 
 def mod_preprocessing (df_data_clean,filter_start_date,filter_endin_date):
-    print(f'START MODUL mod_preprocessing')
+    print(f'START MODUL mod_preprocessi')
     df_clean_filter = filter_data_by_date_range(df_data_clean, filter_start_date, filter_endin_date)
     selected_columns =['date','close','returns','direction','momentun','volatility','MA','day_week']
     df_preprocessing = pd.DataFrame(df_clean_filter, columns=selected_columns)
@@ -34,6 +34,6 @@ def mod_preprocessing (df_data_clean,filter_start_date,filter_endin_date):
     excel_file_path = os.path.join(path_base, folder_preprocessing, "df_preprocessing.xlsx")
     df_preprocessing.to_excel(excel_file_path, index=False)
     
-    print(f'ENDIN MODUL mod_preprocessing')
+    print(f'ENDIN MODUL mod_preprocessi')
     print('\n')
     return df_preprocessing
