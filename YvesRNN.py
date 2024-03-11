@@ -107,7 +107,7 @@ y_test = df_lag_dir['direction'].iloc[split:].copy()
 
 dropout_values = [0.1]
 neurons_values = [10]
-batch_sizes = [8]
+batch_sizes = [32]
 learning_rates = [0.001]
 optimizers = 'adam'
 
@@ -130,11 +130,11 @@ for dropout_rate in dropout_values:
                 optimizer = Adam(learning_rate=learning_rate_value)
                 model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
 
-                model.fit(X_train, y_train, 
-                          epochs=50, 
-                          verbose=0,
-                          validation_data=(X_test, y_test),
-                          batch_size=batch_size_value)
+                history = model.fit(X_train, y_train, 
+                                    epochs=150, 
+                                    verbose=1,
+                                    validation_data=(X_test, y_test),
+                                    batch_size=batch_size_value)
 
                 # y_pred
                 y_pred = model.predict(X_test, batch_size=None)
@@ -157,15 +157,35 @@ for dropout_rate in dropout_values:
                                    'F1-Score     ': f1,
                                    'AUC-ROC      ': auc_roc})
                 
-                print("Training Loss:", history.history['loss'])
-                print("Training Accuracy:", history.history['accuracy'])
-                print("Validation Loss:", history.history['val_loss'])
-                print("Validation Accuracy:", history.history['val_accuracy'])
+                #print("Training Loss:", history.history['loss'])
+                #print("Training Accuracy:", history.history['accuracy'])
+                #print("Validation Loss:", history.history['val_loss'])
+                #print("Validation Accuracy:", history.history['val_accuracy'])
+                
+
 
                 print(f"Training model ending for Dropout = {dropout_rate}, Neurons = {num_neurons}, Batch Size = {batch_size_value}, Learning Rate = {learning_rate_value}, Optimizer = {optimizers}")
                 print('\n')
 
+                plt.figure(figsize=(12, 6))
+                
+# Loss
+plt.subplot(1, 2, 1)
+plt.plot(history.history['loss'], label='Training Loss')
+plt.plot(history.history['val_loss'], label='Validation Loss')
+plt.title('Training and Validation Loss')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.legend()
 
+# Accuracy
+plt.subplot(1, 2, 2)
+plt.plot(history.history['accuracy'], label='Training Accuracy')
+plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+plt.title('Training and Validation Accuracy')
+plt.xlabel('Epoch')
+plt.ylabel('Accuracy')
+plt.legend()
 
 df_results = pd.DataFrame(df_results)
 
