@@ -4,7 +4,7 @@ save_data_on_exit = True
 save_history = True
 save_non_project_files = False
 project_type = 'empty-project-type'
-recent_files = ['YvesRNN.py', 'SP500_IAsimple.py', 'main/functions/def_functions.py', 'draft.py', 'main/modules/mod_preprocessing.py', 'main/sp500_IA.py']
+recent_files = ['YvesRNN.py', 'SP500_IAsimple.py', 'main/modules/mod_preprocessing.py', 'main/sp500_IA.py', 'main/modules/mod_init.py']
 
 [main]
 version = 0.2.0

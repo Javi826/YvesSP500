@@ -117,7 +117,6 @@ for dropout_rate in dropout_values:
     for num_neurons in neurons_values:
         for batch_size_value in batch_sizes:
             for learning_rate_value in learning_rates:
-
                 print(f"Training model starts for Dropout = {dropout_rate}, Neurons = {num_neurons}, Batch Size = {batch_size_value}, Learning Rate = {learning_rate_value}, Optimizer = {optimizers}")
 
                 set_seeds()
@@ -167,8 +166,8 @@ for dropout_rate in dropout_values:
                 print(f"Training model ending for Dropout = {dropout_rate}, Neurons = {num_neurons}, Batch Size = {batch_size_value}, Learning Rate = {learning_rate_value}, Optimizer = {optimizers}")
                 print('\n')
 
-                plt.figure(figsize=(12, 6))
                 
+plt.figure(figsize=(12, 6))                
 # Loss
 plt.subplot(1, 2, 1)
 plt.plot(history.history['loss'], label='Training Loss')
