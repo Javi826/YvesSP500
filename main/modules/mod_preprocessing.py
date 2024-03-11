@@ -6,7 +6,7 @@ Created on Mon Nov  8 22:54:48 2023
 from functions.def_functions import *
 from paths.paths import path_base,folder_preprocessing
 
-def mod_preprocessing (df_data_clean,filter_start_date,filter_endin_date):
+def mod_preprocessing (df_data_clean,filter_start_date,filter_endin_date,lags):
     print(f'START MODUL mod_preprocessi')
     df_clean_filter = filter_data_by_date_range(df_data_clean, filter_start_date, filter_endin_date)
     selected_columns =['date','close','returns','direction','momentun','volatility','MA','day_week']
@@ -18,7 +18,7 @@ def mod_preprocessing (df_data_clean,filter_start_date,filter_endin_date):
     df_preprocessing['volatility'] = df_preprocessing['returns'].rolling(20).std().shift(1)
     df_preprocessing['MA'] = df_preprocessing['close'].rolling(200).mean().shift(1)
     
-    lags = 5  
+    lags = lags
     cols = []
     for lag in range(1,lags+1):
         col =f'lag_{lag}'

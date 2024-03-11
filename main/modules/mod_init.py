@@ -10,6 +10,9 @@ import os
 import pandas as pd
 
 
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
 # IGNORE WARNINGS
 warnings.filterwarnings("ignore")
 
