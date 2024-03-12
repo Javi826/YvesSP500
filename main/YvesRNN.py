@@ -77,7 +77,6 @@ X_df_lag_tr_nr = (X_df_lag_tr - mu_tr) / std_tr
 X_df_lag_tr_nr_reshaped = X_df_lag_tr_nr.values.reshape(-1, lags, features)
 
 X_train = X_df_lag_tr_nr_reshaped
-
 y_train = train_data['direction']
 
 #X_TEST y_test
@@ -90,7 +89,6 @@ X_df_lag_ts_ns = (X_df_lag_ts - mu_ts) / std_ts
 X_df_lag_ts_ns_reshaped = X_df_lag_ts_ns.values.reshape(-1, lags, features)
 
 X_test = X_df_lag_ts_ns_reshaped
-
 y_test = tests_data['direction']
 
 #LOOPs
@@ -131,7 +129,7 @@ for dropout_rate in dropout_values:
 
                 history = model.fit(X_train, y_train, 
                                     epochs=25, 
-                                    verbose=1,
+                                    verbose=0,
                                     validation_data=(X_test, y_test),
                                     batch_size=batch_size_value)
 
