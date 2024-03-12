@@ -88,47 +88,29 @@ def class_weight(df_preprocessing):
     w1 = (1/c1) * (len(df_preprocessing)) / 2
     return {0: w0, 1:w1}
 
-def create_deep_rnn_model(hl=2, hu=100, layer='SimpleRNN',
-                          optimizer='rmsprop', features=1,
-                          dropout=False, rate=0.3, seed=100, lags=5):
-    if hl <= 2:
-        hl = 2
-    if layer == 'SimpleRNN':
-        layer = SimpleRNN
-    else:
-        layer = LSTM
-    
-    model = Sequential()
-    model.add(layer(hu, input_shape=(lags, features), return_sequences=True))
-    
-    if dropout:
-        model.add(Dropout(rate, seed=seed))
-    
-    for _ in range(2, hl):
-        model.add(layer(hu, return_sequences=True))
-        if dropout:
-            model.add(Dropout(rate, seed=seed))
-    
-    model.add(layer(hu))
-    model.add(Dense(1, activation='sigmoid'))
-    model.compile(optimizer=optimizer,
-                  loss='binary_crossentropy',
-                  metrics=['accuracy'])
-    
-    return model
 
 
+def plot_loss(history):
+    plt.figure(figsize=(12, 6))
+    plt.subplot(1, 2, 1)
+    plt.plot(history.history['loss'], label='Training Loss')
+    plt.plot(history.history['val_loss'], label='Validation Loss')
+    plt.title('Training and Validation Loss')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.show()
 
-
-
-
-
-
-
-
-
-
-
+def plot_accu(history):
+    plt.figure(figsize=(12, 6))
+    plt.subplot(1, 2, 2)
+    plt.plot(history.history['accuracy'], label='Training Accuracy')
+    plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+    plt.title('Training and Validation Accuracy')
+    plt.xlabel('Epoch')
+    plt.ylabel('Accuracy')
+    plt.legend()
+    plt.show()
 def df_plots(x, y, x_label, y_label,plot_style):
     
     plt.figure(figsize=(10, 6))

@@ -16,7 +16,7 @@ import yfinance as yf
 from modules.mod_init import *
 from paths.paths import file_df_data,folder_csv,path_file_csv
 from columns.columns import columns_csv_yahoo,columns_clean_order
-from functions.def_functions import class_weight,create_deep_rnn_model,set_seeds
+from functions.def_functions import set_seeds, class_weight,plots_histograms,plot_loss, plot_accu
 from modules.mod_dtset_clean import mod_dtset_clean
 from modules.mod_preprocessing import mod_preprocessing
 
@@ -29,9 +29,6 @@ from keras.models import Sequential
 from keras.optimizers.legacy import SGD, RMSprop, Adagrad, Adadelta, Adam, Adamax, Nadam
 from keras.layers import SimpleRNN, LSTM, Dense, Dropout
 from sklearn.metrics import accuracy_score,f1_score,recall_score,precision_score,confusion_matrix,roc_curve, roc_auc_score
-
-
-os.system("afplay /System/Library/Sounds/Ping.aiff")
 
 lags=5
 features=1
@@ -168,24 +165,8 @@ for dropout_rate in dropout_values:
                 print('\n')
 
                 
-plt.figure(figsize=(12, 6))                
-# Loss
-plt.subplot(1, 2, 1)
-plt.plot(history.history['loss'], label='Training Loss')
-plt.plot(history.history['val_loss'], label='Validation Loss')
-plt.title('Training and Validation Loss')
-plt.xlabel('Epoch')
-plt.ylabel('Loss')
-plt.legend()
-
-# Accuracy
-plt.subplot(1, 2, 2)
-plt.plot(history.history['accuracy'], label='Training Accuracy')
-plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
-plt.title('Training and Validation Accuracy')
-plt.xlabel('Epoch')
-plt.ylabel('Accuracy')
-plt.legend()
+plot_loss(history)
+plot_accu(history)
 
 df_results = pd.DataFrame(df_results)
 
@@ -195,7 +176,7 @@ print("Results saved in: 'metrics_results.xlsx'")
 
 elapsed_time = time.time() - start_time
 hours, minutes = divmod(elapsed_time, 3600)
-minutes = minutes / 60  # Convertir los minutos restantes a fracción de hora
+minutes = minutes / 60  
 
 os.system("afplay /System/Library/Sounds/Ping.aiff")
 print(f"Total time taken for the process: {int(hours)} hours, {int(minutes)} minutes")
