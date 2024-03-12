@@ -56,20 +56,23 @@ filter_start_date = '2000-01-01'
 filter_endin_date = '2018-12-31'
 df_preprocessing = mod_preprocessing(df_data_clean,filter_start_date,filter_endin_date,lags)
 
-print(df_preprocessing)
+#print(df_preprocessing)
 
-
-lag_columns =['date'] + [col for col in df_preprocessing.columns if col.startswith('lag')] + ['direction']
-df_lag_dir = df_preprocessing[lag_columns].copy()
+df_columns =['date'] + [col for col in df_preprocessing.columns if col.startswith('lag')] + ['direction']
+df_date_lag_dir = df_preprocessing[df_columns].copy()
 
 #DATA SPLIT
 #------------------------------------------------------------------------------
-split = int(len(df_lag_dir) * 0.8)
-lag_columns_selected = [col for col in df_lag_dir.columns if col.startswith('lag')]
+cutoff_date = '2017-12-31'
+
+train_data = df_date_lag_dir[df_date_lag_dir['date'] <= cutoff_date]
+tests_data = df_date_lag_dir[df_date_lag_dir['date'] > cutoff_date]
+
+lag_columns_selected = [col for col in df_date_lag_dir.columns if col.startswith('lag')]
 
 # X_TRAIN y_train
 #------------------------------------------------------------------------------
-X_df_lag_tr = df_lag_dir[lag_columns_selected].iloc[:split].copy()
+X_df_lag_tr = train_data[lag_columns_selected]
 
 mu_tr, std_tr = X_df_lag_tr.mean(), X_df_lag_tr.std()
 X_df_lag_tr_nr = (X_df_lag_tr - mu_tr) / std_tr
@@ -78,11 +81,11 @@ X_df_lag_tr_nr_reshaped = X_df_lag_tr_nr.values.reshape(-1, lags, 1)
 
 X_train = X_df_lag_tr_nr_reshaped
 
-y_train = df_lag_dir['direction'].iloc[:split].copy()
+y_train = train_data['direction']
 
 #X_TEST y_test
 #------------------------------------------------------------------------------
-X_df_lag_ts = df_lag_dir[lag_columns_selected].iloc[split:].copy()
+X_df_lag_ts = tests_data[lag_columns_selected]
 
 mu_ts, std_ts = X_df_lag_ts.mean(), X_df_lag_ts.std()
 X_df_lag_ts_ns = (X_df_lag_ts - mu_ts) / std_ts
@@ -91,7 +94,7 @@ X_df_lag_ts_ns_reshaped = X_df_lag_ts_ns.values.reshape(-1, lags, 1)
 
 X_test = X_df_lag_ts_ns_reshaped
 
-y_test = df_lag_dir['direction'].iloc[split:].copy()
+y_test = tests_data['direction']
 
 #LOOPs
 #------------------------------------------------------------------------------
@@ -107,8 +110,8 @@ y_test = df_lag_dir['direction'].iloc[split:].copy()
 
 dropout_values = [0.1]
 neurons_values = [10]
-batch_sizes = [32]
-learning_rates = [0.001]
+batch_sizes = [16]
+learning_rates = [0.01]
 optimizers = 'adam'
 
 df_results = []
@@ -130,7 +133,7 @@ for dropout_rate in dropout_values:
                 model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
 
                 history = model.fit(X_train, y_train, 
-                                    epochs=150, 
+                                    epochs=25, 
                                     verbose=1,
                                     validation_data=(X_test, y_test),
                                     batch_size=batch_size_value)
