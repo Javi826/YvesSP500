@@ -74,7 +74,7 @@ X_df_lag_tr = train_data[lag_columns_selected]
 mu_tr, std_tr = X_df_lag_tr.mean(), X_df_lag_tr.std()
 X_df_lag_tr_nr = (X_df_lag_tr - mu_tr) / std_tr
 
-X_df_lag_tr_nr_reshaped = X_df_lag_tr_nr.values.reshape(-1, lags, 1)
+X_df_lag_tr_nr_reshaped = X_df_lag_tr_nr.values.reshape(-1, lags, features)
 
 X_train = X_df_lag_tr_nr_reshaped
 
@@ -87,7 +87,7 @@ X_df_lag_ts = tests_data[lag_columns_selected]
 mu_ts, std_ts = X_df_lag_ts.mean(), X_df_lag_ts.std()
 X_df_lag_ts_ns = (X_df_lag_ts - mu_ts) / std_ts
 
-X_df_lag_ts_ns_reshaped = X_df_lag_ts_ns.values.reshape(-1, lags, 1)
+X_df_lag_ts_ns_reshaped = X_df_lag_ts_ns.values.reshape(-1, lags, features)
 
 X_test = X_df_lag_ts_ns_reshaped
 
