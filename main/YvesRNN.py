@@ -66,7 +66,7 @@ df_date_lag_dir = df_preprocessing[df_columns].copy()
 cutoff_date = '2017-12-31'
 
 train_data = df_date_lag_dir[df_date_lag_dir['date'] <= cutoff_date]
-tests_data = df_date_lag_dir[df_date_lag_dir['date'] > cutoff_date]
+tests_data = df_date_lag_dir[df_date_lag_dir['date']  > cutoff_date]
 
 lag_columns_selected = [col for col in df_date_lag_dir.columns if col.startswith('lag')]
 
@@ -164,8 +164,6 @@ for dropout_rate in dropout_values:
                 #print("Validation Loss:", history.history['val_loss'])
                 #print("Validation Accuracy:", history.history['val_accuracy'])
                 
-
-
                 print(f"Training model ending for Dropout = {dropout_rate}, Neurons = {num_neurons}, Batch Size = {batch_size_value}, Learning Rate = {learning_rate_value}, Optimizer = {optimizers}")
                 print('\n')
 
