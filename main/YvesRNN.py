@@ -27,6 +27,7 @@ import tensorflow as tf
 from tensorflow.python.client import device_lib
 from keras.models import Sequential
 from keras.optimizers.legacy import SGD, RMSprop, Adagrad, Adadelta, Adam, Adamax, Nadam
+from sklearn.preprocessing import StandardScaler
 from keras.layers import SimpleRNN, LSTM, Dense, Dropout
 from sklearn.metrics import accuracy_score,f1_score,recall_score,precision_score,confusion_matrix,roc_curve, roc_auc_score
 
@@ -53,8 +54,6 @@ filter_start_date = '2000-01-01'
 filter_endin_date = '2018-12-31'
 df_preprocessing = mod_preprocessing(df_data_clean,filter_start_date,filter_endin_date,lags)
 
-#print(df_preprocessing)
-
 df_columns =['date'] + [col for col in df_preprocessing.columns if col.startswith('lag')] + ['direction']
 df_date_lag_dir = df_preprocessing[df_columns].copy()
 
@@ -67,24 +66,27 @@ tests_data = df_date_lag_dir[df_date_lag_dir['date']  > cutoff_date]
 
 lag_columns_selected = [col for col in df_date_lag_dir.columns if col.startswith('lag')]
 
-# X_TRAIN y_train
+#X_TRAIN & y_train | NORMALIZATION + RESHAPE
 #------------------------------------------------------------------------------
 X_df_lag_tr = train_data[lag_columns_selected]
 
-mu_tr, std_tr = X_df_lag_tr.mean(), X_df_lag_tr.std()
-X_df_lag_tr_nr = (X_df_lag_tr - mu_tr) / std_tr
+scaler_tr = StandardScaler()
+X_df_lag_tr_nr = scaler_tr.fit_transform(X_df_lag_tr)
+X_df_lag_tr_nr = pd.DataFrame(X_df_lag_tr_nr, columns=lag_columns_selected)
+
 
 X_df_lag_tr_nr_reshaped = X_df_lag_tr_nr.values.reshape(-1, lags, features)
 
 X_train = X_df_lag_tr_nr_reshaped
 y_train = train_data['direction']
 
-#X_TEST y_test
+#X_TEST & y_tests | NORMALIZATION + RESHAPE
 #------------------------------------------------------------------------------
 X_df_lag_ts = tests_data[lag_columns_selected]
 
-mu_ts, std_ts = X_df_lag_ts.mean(), X_df_lag_ts.std()
-X_df_lag_ts_ns = (X_df_lag_ts - mu_ts) / std_ts
+scaler_ts = StandardScaler()
+X_df_lag_ts_ns = scaler_ts.fit_transform(X_df_lag_ts)
+X_df_lag_ts_ns = pd.DataFrame(X_df_lag_ts_ns, columns=lag_columns_selected)
 
 X_df_lag_ts_ns_reshaped = X_df_lag_ts_ns.values.reshape(-1, lags, features)
 
@@ -103,18 +105,18 @@ y_test = tests_data['direction']
 #learning_rates= [0.1, 0.01, 0.001, 0.0001]
 #optimizers_to_try = [SGD, RMSprop, Adagrad, Adadelta, Adam, Adamax, Nadam]
 
-dropout_values = [0.1]
-neurons_values = [10]
+dropout_val = [0.1]
+neurons_val = [10]
 batch_sizes = [16]
-learning_rates = [0.01]
+learning_ra = [0.01]
 optimizers = 'adam'
 
 df_results = []
 
-for dropout_rate in dropout_values:
-    for num_neurons in neurons_values:
+for dropout_rate in dropout_val:
+    for num_neurons in neurons_val:
         for batch_size_value in batch_sizes:
-            for learning_rate_value in learning_rates:
+            for learning_rate_value in learning_ra:
                 print(f"Training model starts for Dropout = {dropout_rate}, Neurons = {num_neurons}, Batch Size = {batch_size_value}, Learning Rate = {learning_rate_value}, Optimizer = {optimizers}")
 
                 set_seeds()
@@ -129,7 +131,7 @@ for dropout_rate in dropout_values:
 
                 history = model.fit(X_train, y_train, 
                                     epochs=25, 
-                                    verbose=0,
+                                    verbose=1,
                                     validation_data=(X_test, y_test),
                                     batch_size=batch_size_value)
 
