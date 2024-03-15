@@ -7,7 +7,7 @@ Created on Sat Dec 30 21:06:19 2023
 import os
 
 ## Directorio para almacenar archivos CSV
-path_base = "/Users/javi/Desktop/ML/sp500_IA"
+path_base = "/Users/javi/Desktop/ML/YvesSP500"
 
 file_df_data = "sp500_data.csv"
 folder_csv = "inputs/historicyh"

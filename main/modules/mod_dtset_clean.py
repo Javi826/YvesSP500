@@ -3,7 +3,8 @@
 Created on Mon Nov  8 22:54:48 2023
 @author: javier
 """
-from functions.def_functions import *
+import os
+from functions.def_functions import add_index_column,date_anio,day_week,sort_columns,rounding_data
 from paths.paths import path_base,folder_df_data_clean,file_df_data_clean
 
 def mod_dtset_clean(df_data,start_date,endin_date):
@@ -30,7 +31,7 @@ def mod_dtset_clean(df_data,start_date,endin_date):
     print(f'ENDIN MODUL mod_dtset_clean\n')
     return df_data_clean
 
-if __name__ == "__main__":
+#if __name__ == "__main__":
     #Este bloque se ejecutará solo si el script se ejecuta directamente,
     #no cuando se importa como un módulo.
-    mod_dtset_clean(df_data,start_date,endin_date)
+#    mod_dtset_clean(df_data,start_date,endin_date)

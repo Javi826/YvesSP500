@@ -33,6 +33,8 @@ from keras.layers import SimpleRNN, LSTM, Dense, Dropout
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score,f1_score,recall_score,precision_score,confusion_matrix,roc_curve, roc_auc_score
 
+results_path = Path('/Users/javi/Desktop/ML/YvesSP500/file_h5')
+
 start_time = time.time()
 
 # YAHOO CALL + SAVE + READING file
@@ -55,7 +57,7 @@ features =1
 lags_val = [50]
 f_start_date = '2000-01-01'
 f_endin_date = '2018-12-31'
-cutoff_dates = ['2017-12-31']
+cutoff_dates = ['2001-12-31']
 
 df_results = []
 
@@ -126,23 +128,23 @@ for lags in lags_val:
                         model.add(Dense(1, activation='sigmoid'))
         
                         optimizer = Adam(learning_rate=le_rate)
-                        model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
+                        model.compile(optimizer=optimizers, loss='binary_crossentropy', metrics=['accuracy'])
                         
-                        #path_destiny = Path.cwd()
-                        #file_name = 'best_model.h5'
-                        #path_file_best = path_destiny / file_name
+                        path_h5 = (results_path / 'best_model.classification.h5').as_posix()
                         
-                        #checkpoint = ModelCheckpoint(path_file_best, 
-                        #                             monitor='val_accuracy', 
-                        #                             save_best_only=True, 
-                        #                             mode='max', 
-                        #                             verbose=1)
+                        checkpointer = ModelCheckpoint(filepath=path_h5,
+                                                       verbose=0,
+                                                       monitor='val_accuracy',
+                                                       mode='max',
+                                                       save_best_only=True)
                         
                         history = model.fit(X_train, y_train, 
-                                            epochs=250, 
+                                            epochs=25, 
                                             verbose=0,
+                                            batch_size=batch_s,
                                             validation_data=(X_test, y_test),
-                                            batch_size=batch_s)
+                                            callbacks=[checkpointer])
+
         
                         # y_pred
                         y_pred = model.predict(X_test, batch_size=None)
@@ -181,8 +183,8 @@ for lags in lags_val:
                         print('\n')
         
                         
-        #plot_loss(history)
-        plot_accu(history)
+                        #plot_loss(history)
+                        plot_accu(history)
         
         print(f"Ending Processing for lags = {lags} and cutoff_date = {cutoff_date}")
         print('\n')
