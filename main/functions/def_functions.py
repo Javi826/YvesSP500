@@ -111,6 +111,7 @@ def plot_accu(history):
     plt.ylabel('Accuracy')
     plt.legend()
     plt.show()
+    
 def df_plots(x, y, x_label, y_label,plot_style):
     
     plt.figure(figsize=(10, 6))
