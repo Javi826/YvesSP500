@@ -57,7 +57,7 @@ features =1
 lags_val = [50]
 f_start_date = '2000-01-01'
 f_endin_date = '2018-12-31'
-cutoff_dates = ['2001-12-31']
+cutoff_dates = ['2017-12-31']
 
 df_results = []
 
@@ -75,7 +75,7 @@ for lags in lags_val:
         #DATA SPLIT
         #------------------------------------------------------------------------------      
         train_data = df_date_lag_dir[df_date_lag_dir['date'] <= cutoff_date]
-        tests_data = df_date_lag_dir[df_date_lag_dir['date']  > cutoff_date]
+        valid_data = df_date_lag_dir[df_date_lag_dir['date']  > cutoff_date]
         
         lag_columns_selected = [col for col in df_date_lag_dir.columns if col.startswith('lag')]
         
@@ -92,18 +92,18 @@ for lags in lags_val:
         X_train = X_df_lag_tr_nr_reshaped
         y_train = train_data['direction']
         
-        #X_TEST & y_tests | NORMALIZATION + RESHAPE
+        #X_valid & y_valid | NORMALIZATION + RESHAPE
         #------------------------------------------------------------------------------
-        X_df_lag_ts = tests_data[lag_columns_selected]
+        X_df_lag_va = valid_data[lag_columns_selected]
         
-        scaler_ts = StandardScaler()
-        X_df_lag_ts_ns = scaler_ts.fit_transform(X_df_lag_ts)
-        X_df_lag_ts_ns = pd.DataFrame(X_df_lag_ts_ns, columns=lag_columns_selected)
+        scaler_va = StandardScaler()
+        X_df_lag_va_ns = scaler_va.fit_transform(X_df_lag_va)
+        X_df_lag_va_ns = pd.DataFrame(X_df_lag_va_ns, columns=lag_columns_selected)
         
-        X_df_lag_ts_ns_reshaped = X_df_lag_ts_ns.values.reshape(-1, lags, features)
+        X_df_lag_va_ns_reshaped = X_df_lag_va_ns.values.reshape(-1, lags, features)
         
-        X_test = X_df_lag_ts_ns_reshaped
-        y_test = tests_data['direction']
+        X_valid = X_df_lag_va_ns_reshaped
+        y_valid = valid_data['direction']
         
         #LOOPs 2
         #------------------------------------------------------------------------------
@@ -129,6 +129,7 @@ for lags in lags_val:
         
                         optimizer = Adam(learning_rate=le_rate)
                         model.compile(optimizer=optimizers, loss='binary_crossentropy', metrics=['accuracy'])
+
                         
                         path_h5 = (results_path / 'best_model.classification.h5').as_posix()
                         
@@ -142,26 +143,19 @@ for lags in lags_val:
                                             epochs=25, 
                                             verbose=0,
                                             batch_size=batch_s,
-                                            validation_data=(X_test, y_test),
+                                            validation_data=(X_valid, y_valid),
                                             callbacks=[checkpointer])
 
         
                         # y_pred
-                        y_pred = model.predict(X_test, batch_size=None)
+                        y_pred = model.predict(X_valid, batch_size=None)
                         y_pred_binary = (y_pred > 0.5).astype(int)
                         
+                        # Training metrics
                         train_loss = history.history['loss'][-1]
                         train_accu = history.history['accuracy'][-1]
-                        
-                        # Métricas de validación
-                        validation_loss = history.history['val_loss'][-1]
-                        validation_accu = history.history['val_accuracy'][-1]
-        
-                        accuracy  = accuracy_score(y_test, y_pred_binary)
-                        precision = precision_score(y_test, y_pred_binary)
-                        recall    = recall_score(y_test, y_pred_binary)
-                        f1        = f1_score(y_test, y_pred_binary)
-                        auc_roc   = roc_auc_score(y_test, y_pred)
+                        valid_loss = history.history['val_loss'][-1]
+                        valid_accu = history.history['val_accuracy'][-1]
         
                         df_results.append({ 'Lags         ': lags,
                                             'Cutoff Date  ': cutoff_date,
@@ -171,14 +165,10 @@ for lags in lags_val:
                                             'Learning Rate': le_rate,
                                             'Optimizer    ': optimizers,
                                             'Train Loss   ': train_loss,
-                                            'Val Loss     ': validation_loss,
+                                            'Val Loss     ': valid_loss,
                                             'Train Accu   ': train_accu,
-                                            'Val Accu     ': validation_accu,
-                                            'Accuracy     ': accuracy,
-                                            'Precision    ': precision,
-                                            'Recall       ': recall,
-                                            'F1-Score     ': f1,
-                                            'AUC-ROC      ': auc_roc})
+                                            'Val Accu     ': valid_accu})
+
                         print(f"Training model ending for Dropout = {dropout}, Neurons = {n_neurons}, Batch Size = {batch_s}, Learning Rate = {le_rate}, Optimizer = {optimizers}")
                         print('\n')
         
