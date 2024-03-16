@@ -52,11 +52,11 @@ df_data_clean = mod_dtset_clean(df_data,start_date,endin_date)
 #------------------------------------------------------------------------------
 
 features =1
-lags_val = [30,40,50,60]
+lags_val = [18,19,20,21,22,23,24,25,26,27,28,29,30]
 f_start_date = '2000-01-01'
 f_endin_date = '2018-12-31'
 cutoff_dates1 = ['2017-12-31']
-cutoff_dates2 = ['2018-12-31']
+
 
 df_results = []
 
@@ -127,7 +127,7 @@ for lags in lags_val:
                         model.add(Dense(1, activation='sigmoid'))
         
                         optimizer = Adam(learning_rate=le_rate)
-                        model.compile(optimizer=optimizers, loss='binary_crossentropy', metrics=['accuracy'])
+                        model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
 
                         file_model_name = f'model_lags_{lags}_date_{cutoff_date}_dropout_{dropout}_neurons_{n_neurons}_batch_{batch_s}_lr_{le_rate}.h5'
                         path_h5 = (results_path / file_model_name).as_posix()
