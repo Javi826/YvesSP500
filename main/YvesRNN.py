@@ -14,7 +14,7 @@ import psutil
 import yfinance as yf
 
 from modules.mod_init import *
-from paths.paths import file_df_data,folder_csv,path_file_csv
+from paths.paths import file_df_data,folder_csv,path_file_csv,results_path
 from columns.columns import columns_csv_yahoo,columns_clean_order
 from functions.def_functions import set_seeds, class_weight,plots_histograms,plot_loss, plot_accu
 from modules.mod_dtset_clean import mod_dtset_clean
@@ -22,7 +22,6 @@ from modules.mod_preprocessing import mod_preprocessing
 
 from pprint import pprint
 from pylab import plt, mpl
-from pathlib import Path
 
 import tensorflow as tf
 from tensorflow.python.client import device_lib
@@ -33,7 +32,6 @@ from keras.layers import SimpleRNN, LSTM, Dense, Dropout
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score,f1_score,recall_score,precision_score,confusion_matrix,roc_curve, roc_auc_score
 
-results_path = Path('/Users/javi/Desktop/ML/YvesSP500/file_h5')
 
 start_time = time.time()
 
@@ -54,7 +52,7 @@ df_data_clean = mod_dtset_clean(df_data,start_date,endin_date)
 #------------------------------------------------------------------------------
 
 features =1
-lags_val = [50]
+lags_val = [30,40,50,60]
 f_start_date = '2000-01-01'
 f_endin_date = '2018-12-31'
 cutoff_dates1 = ['2017-12-31']
@@ -108,9 +106,9 @@ for lags in lags_val:
         
         #LOOPs 2
         #------------------------------------------------------------------------------
-        dropout_val = [0.1]
-        neurons_val = [30]
-        batch_s_val = [16]
+        dropout_val = [0.1,0.9]
+        neurons_val = [30,60]
+        batch_s_val = [16,32,64]
         le_rate_val = [0.001]
         optimizers = 'adam'
         #optimizers_to_try = [SGD, RMSprop, Adagrad, Adadelta, Adam, Adamax, Nadam]
@@ -131,8 +129,8 @@ for lags in lags_val:
                         optimizer = Adam(learning_rate=le_rate)
                         model.compile(optimizer=optimizers, loss='binary_crossentropy', metrics=['accuracy'])
 
-                        model_name = f'model_lags_{lags}_date_{cutoff_date}_dropout_{dropout}_neurons_{n_neurons}_batch_{batch_s}_lr_{le_rate}.h5'
-                        path_h5 = (results_path / model_name).as_posix()
+                        file_model_name = f'model_lags_{lags}_date_{cutoff_date}_dropout_{dropout}_neurons_{n_neurons}_batch_{batch_s}_lr_{le_rate}.h5'
+                        path_h5 = (results_path / file_model_name).as_posix()
                         
                         checkpointer = ModelCheckpoint(filepath=path_h5,
                                                        verbose=0,
@@ -141,14 +139,15 @@ for lags in lags_val:
                                                        save_best_only=True)
                         
                         history = model.fit(X_train, y_train, 
-                                            epochs=25, 
+                                            epochs=13, 
                                             verbose=0,
                                             batch_size=batch_s,
                                             validation_data=(X_valid, y_valid),
                                             callbacks=[checkpointer])
                         
                         accuracy_history = pd.DataFrame(history.history)
-                        accuracy_history.index += 1  # Sumar 1 al índice para obtener el número de época
+                        #print(accuracy_history)
+                        accuracy_history.index += 1
                         
                         # Encontrar la mejor precisión de validación y la época correspondiente
                         best_accur = accuracy_history['val_accuracy'].max()
@@ -165,17 +164,21 @@ for lags in lags_val:
                         valid_loss = history.history['val_loss'][-1]
                         valid_accu = history.history['val_accuracy'][-1]
         
-                        df_results.append({ 'Lags         ': lags,
-                                            'Cutoff Date  ': cutoff_date,
-                                            'Dropout      ': dropout,
-                                            'Neurons      ': n_neurons,
-                                            'Batch Size   ': batch_s,
-                                            'Learning Rate': le_rate,
-                                            'Optimizer    ': optimizers,
-                                            'Train Loss   ': train_loss,
-                                            'Val Loss     ': valid_loss,
-                                            'Train Accu   ': train_accu,
-                                            'Val Accu     ': valid_accu})
+                        df_results.append({
+                            'Lags': lags,
+                            'Cutoff Date': cutoff_date,
+                            'Dropout': dropout,
+                            'Neurons': n_neurons,
+                            'Batch Size': batch_s,
+                            'Learning Rate': le_rate,
+                            'Optimizer': optimizers,
+                            'Train Loss': train_loss,
+                            'Val Loss': valid_loss,
+                            'Train Accu': train_accu,
+                            'Val Accu': valid_accu,
+                            'Best val_accuracy': best_accur,
+                            'Best epoch': best_epoch
+                        })
 
                         print(f"Training model ending for Dropout = {dropout}, Neurons = {n_neurons}, Batch Size = {batch_s}, Learning Rate = {le_rate}, Optimizer = {optimizers}")
                         print('\n')
@@ -188,6 +191,9 @@ for lags in lags_val:
         print('\n')
         
 df_results_all = pd.DataFrame(df_results)
+
+#df_results_all['Best val_accuracy'] = best_accur
+#df_results_all['Best epoch'] = best_epoch
 
 # Guarda el DataFrame en un archivo Excel
 df_results_all.to_excel('df_results_all.xlsx', index=False)

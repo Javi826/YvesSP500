@@ -5,6 +5,7 @@ Created on Sat Dec 30 21:06:19 2023
 """
 
 import os
+from pathlib import Path
 
 ## Directorio para almacenar archivos CSV
 path_base = "/Users/javi/Desktop/ML/YvesSP500"
@@ -25,6 +26,7 @@ file_preprocessing = 'df_preprocessing.xlsx'
 folder_preprocessing = "inputs/preprocessing"
 #path_preprocessing = os.path.join(path_base, folder_preprocessing, file_preprocessing)
 
+results_path = Path('/Users/javi/Desktop/ML/YvesSP500/file_h5')
 
 
 
