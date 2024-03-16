@@ -57,12 +57,13 @@ features =1
 lags_val = [50]
 f_start_date = '2000-01-01'
 f_endin_date = '2018-12-31'
-cutoff_dates = ['2017-12-31']
+cutoff_dates1 = ['2017-12-31']
+cutoff_dates2 = ['2018-12-31']
 
 df_results = []
 
 for lags in lags_val:
-    for cutoff_date in cutoff_dates:
+    for cutoff_date in cutoff_dates1:
         print(f"Starts Processing for lags = {lags} and cutoff_date = {cutoff_date}")
         print('\n')
         
@@ -92,7 +93,7 @@ for lags in lags_val:
         X_train = X_df_lag_tr_nr_reshaped
         y_train = train_data['direction']
         
-        #X_valid & y_valid | NORMALIZATION + RESHAPE
+        #X_VALID & y_valid | NORMALIZATION + RESHAPE
         #------------------------------------------------------------------------------
         X_df_lag_va = valid_data[lag_columns_selected]
         
@@ -130,8 +131,8 @@ for lags in lags_val:
                         optimizer = Adam(learning_rate=le_rate)
                         model.compile(optimizer=optimizers, loss='binary_crossentropy', metrics=['accuracy'])
 
-                        
-                        path_h5 = (results_path / 'best_model.classification.h5').as_posix()
+                        model_name = f'model_lags_{lags}_date_{cutoff_date}_dropout_{dropout}_neurons_{n_neurons}_batch_{batch_s}_lr_{le_rate}.h5'
+                        path_h5 = (results_path / model_name).as_posix()
                         
                         checkpointer = ModelCheckpoint(filepath=path_h5,
                                                        verbose=0,
@@ -145,11 +146,18 @@ for lags in lags_val:
                                             batch_size=batch_s,
                                             validation_data=(X_valid, y_valid),
                                             callbacks=[checkpointer])
+                        
+                        accuracy_history = pd.DataFrame(history.history)
+                        accuracy_history.index += 1  # Sumar 1 al índice para obtener el número de época
+                        
+                        # Encontrar la mejor precisión de validación y la época correspondiente
+                        best_accur = accuracy_history['val_accuracy'].max()
+                        best_epoch = accuracy_history['val_accuracy'].idxmax()
+                        
+                        # Imprimir la mejor precisión de validación y la época correspondiente
+                        print(f"Best val_accuracy: {best_accur:.4f}")
+                        print(f"Best epoch: {best_epoch}")
 
-        
-                        # y_pred
-                        y_pred = model.predict(X_valid, batch_size=None)
-                        y_pred_binary = (y_pred > 0.5).astype(int)
                         
                         # Training metrics
                         train_loss = history.history['loss'][-1]
@@ -174,7 +182,7 @@ for lags in lags_val:
         
                         
                         #plot_loss(history)
-                        plot_accu(history)
+                        #plot_accu(history)
         
         print(f"Ending Processing for lags = {lags} and cutoff_date = {cutoff_date}")
         print('\n')
