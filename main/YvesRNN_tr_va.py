@@ -56,12 +56,13 @@ lags_val = [5]
 f_start_date  = '2000-01-01'
 f_endin_date  = '2019-12-31'
 
-cutoff_trains  = ['2017-12-31']
+start_cutoff_valid  = ['2016-12-31']
+endin_cutoff_valid  = '2018-12-31'
 
 df_results = []
 
 for lags in lags_val:
-    for cutoff_train in cutoff_trains:
+    for cutoff_train in start_cutoff_valid:
         print(f"Starts Processing for lags = {lags} and cutoff_train = {cutoff_train}")
         print('\n')
         
@@ -74,8 +75,8 @@ for lags in lags_val:
         #DATA SPLIT
         #------------------------------------------------------------------------------      
         train_data = df_date_lag_dir[df_date_lag_dir['date'] <= cutoff_train]
-        valid_data = df_date_lag_dir[df_date_lag_dir['date']  > cutoff_train]
-        
+        valid_data = df_date_lag_dir[(df_date_lag_dir['date'] > cutoff_train) & (df_date_lag_dir['date'] <= endin_cutoff_valid)]
+
         lag_columns_selected = [col for col in df_date_lag_dir.columns if col.startswith('lag')]
         
         #X_TRAIN & y_train | NORMALIZATION + RESHAPE
@@ -110,7 +111,7 @@ for lags in lags_val:
         neurons_val = [30]
         batch_s_val = [16]
         le_rate_val = [0.001]
-        optimizers = 'adam'
+        optimizers  = 'adam'
         #optimizers_to_try = [SGD, RMSprop, Adagrad, Adadelta, Adam, Adamax, Nadam]
         
         for dropout in dropout_val:

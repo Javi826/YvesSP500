@@ -29,7 +29,7 @@ df_preprocessing = pd.read_excel(path_preprocessing, header=0, skiprows=0)
 df_columns =['date'] + [col for col in df_preprocessing.columns if col.startswith('lag')] + ['direction']
 df_date_lag_dir = df_preprocessing[df_columns].copy()
 
-#TESTSDATA SPLIT
+#TESTS DATA SPLIT
 #------------------------------------------------------------------------------    
 start_cutoff_tests  = '2017-12-31'
 endin_cutoff_tests  = '2018-12-31'
@@ -47,6 +47,6 @@ X_df_lag_ts_nr = pd.DataFrame(X_df_lag_ts_nr, columns=lag_columns_selected)
 
 X_df_lag_ts_nr_reshaped = X_df_lag_ts_nr.values.reshape(-1, lags, features)
 
-X_TESTS = X_df_lag_ts_nr_reshaped
+X_tests = X_df_lag_ts_nr_reshaped
 y_tests = tests_data['direction']
 
