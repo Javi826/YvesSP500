@@ -56,7 +56,7 @@ lags_val = [5]
 f_start_date  = '2000-01-01'
 f_endin_date  = '2019-12-31'
 
-start_cutoff_valid  = ['2016-12-31']
+start_cutoff_valid  = ['2017-01-01']
 endin_cutoff_valid  = '2018-12-31'
 
 df_results = []
@@ -130,7 +130,7 @@ for lags in lags_val:
                         optimizer = Adam(learning_rate=le_rate)
                         model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
 
-                        file_model_name = f'model_lags_{lags}_date_{cutoff_train}_dropout_{dropout}_neurons_{n_neurons}_batch_{batch_s}_lr_{le_rate}.h5'
+                        file_model_name = f'model_lags_{str(lags).zfill(2)}_date_{cutoff_train}_dropout_{dropout}_neurons_{n_neurons}_batch_{batch_s}_lr_{le_rate}.h5'
                         path_h5 = (results_path / file_model_name).as_posix()
                         
                         checkpointer = ModelCheckpoint(filepath=path_h5, verbose=0, monitor='val_accuracy',mode='max',save_best_only=True)
@@ -154,8 +154,7 @@ for lags in lags_val:
                         # Imprimir la mejor precisión de validación y la época correspondiente
                         print(f"Best val_accuracy: {best_accur:.4f}")
                         print(f"Best epoch: {best_epoch}")
-
-                        
+                     
                         # Training metrics
                         train_loss = history.history['loss'][-1]
                         train_accu = history.history['accuracy'][-1]
