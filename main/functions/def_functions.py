@@ -89,7 +89,6 @@ def class_weight(df_preprocessing):
     return {0: w0, 1:w1}
 
 
-
 def plot_loss(history):
     plt.figure(figsize=(12, 6))
     plt.subplot(1, 2, 1)

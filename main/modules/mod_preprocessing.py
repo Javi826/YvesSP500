@@ -8,20 +8,20 @@ from paths.paths import path_base,folder_preprocessing
 
 def mod_preprocessing (df_data_clean,f_start_date,f_endin_date,lags):
     print(f'START MODUL mod_preprocessi')
-    df_clean_filter = filter_data_by_date_range(df_data_clean, f_start_date, f_endin_date)
+    df_clean_filter  = filter_data_by_date_range(df_data_clean, f_start_date, f_endin_date)
     selected_columns =['date','close','returns','direction','momentun','volatility','MA','day_week']
     df_preprocessing = pd.DataFrame(df_clean_filter, columns=selected_columns)
     
-    df_preprocessing['returns'] = np.log(df_data_clean['close'] / df_data_clean['close'].shift(1))  
-    df_preprocessing['direction'] = np.where(df_preprocessing['returns']>0, 1, 0) 
-    df_preprocessing['momentun'] = df_preprocessing['returns'].rolling(5).mean().shift(1)
+    df_preprocessing['returns']    = np.log(df_data_clean['close'] / df_data_clean['close'].shift(1))  
+    df_preprocessing['direction']  = np.where(df_preprocessing['returns']>0, 1, 0) 
+    df_preprocessing['momentun']   = df_preprocessing['returns'].rolling(5).mean().shift(1)
     df_preprocessing['volatility'] = df_preprocessing['returns'].rolling(20).std().shift(1)
-    df_preprocessing['MA'] = df_preprocessing['close'].rolling(200).mean().shift(1)
+    df_preprocessing['MA']         = df_preprocessing['close'].rolling(200).mean().shift(1)
     
     lags = lags
     cols = []
     for lag in range(1,lags+1):
-        col =f'lag_{lag}'
+        col = f'lag_{str(lag).zfill(2)}'
         df_preprocessing[col] = df_preprocessing['returns'].shift(lag)
         cols.append(col)
     df_preprocessing.dropna(inplace=True)
@@ -31,7 +31,8 @@ def mod_preprocessing (df_data_clean,f_start_date,f_endin_date,lags):
     df_plots(df_preprocessing['date'],df_preprocessing['close'],'date','close','lines')
     
     # SAVE Dataframe
-    excel_file_path = os.path.join(path_base, folder_preprocessing, "df_preprocessing.xlsx")
+    file_suffix = f"_{str(lags).zfill(2)}_{f_start_date}_{f_endin_date}.xlsx"
+    excel_file_path = os.path.join(path_base, folder_preprocessing, f"df_preprocessing{file_suffix}")
     df_preprocessing.to_excel(excel_file_path, index=False)
     
     print(f'ENDIN MODUL mod_preprocessi')
