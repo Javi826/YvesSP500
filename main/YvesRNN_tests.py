@@ -17,7 +17,7 @@ from keras.models import load_model
 
 #TEST DATA SELECTION ON PREPROCESSING file
 #------------------------------------------------------------------------------
-lags = 5
+lags = 20
 features =1
 start_tests = '2000-01-01'
 endin_tests = '2019-12-31'
@@ -54,7 +54,7 @@ y_tests = tests_data['direction']
 #------------------------------------------------------------------------------
 dropout   = 0.1
 n_neurons = 30
-batch_s   = 16
+batch_s   = 32
 le_rate   = 0.001
 cutoff_train  = '2017-01-01'
 

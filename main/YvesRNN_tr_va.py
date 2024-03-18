@@ -52,7 +52,7 @@ df_data_clean = mod_dtset_clean(df_data,start_date,endin_date)
 #------------------------------------------------------------------------------
 
 features =1
-lags_val = [5]
+lags_val = [20]
 f_start_date  = '2000-01-01'
 f_endin_date  = '2019-12-31'
 
@@ -109,7 +109,7 @@ for lags in lags_val:
         #------------------------------------------------------------------------------
         dropout_val = [0.1]
         neurons_val = [30]
-        batch_s_val = [16]
+        batch_s_val = [32]
         le_rate_val = [0.001]
         optimizers  = 'adam'
         #optimizers_to_try = [SGD, RMSprop, Adagrad, Adadelta, Adam, Adamax, Nadam]
