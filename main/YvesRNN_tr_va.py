@@ -21,6 +21,7 @@ from modules.mod_dtset_clean import mod_dtset_clean
 from modules.mod_preprocessing import mod_preprocessing
 from modules.mod_pipeline import mod_pipeline
 
+
 from pprint import pprint
 from pylab import plt, mpl
 
@@ -30,6 +31,7 @@ from keras.models import Sequential
 from keras.optimizers.legacy import SGD, RMSprop, Adagrad, Adadelta, Adam, Adamax, Nadam
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.layers import SimpleRNN, LSTM, Dense, Dropout
+from keras.regularizers import l2
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score,f1_score,recall_score,precision_score,confusion_matrix,roc_curve, roc_auc_score
 
@@ -51,20 +53,20 @@ df_clean = mod_dtset_clean(df_data,start_date,endin_date)
 
 #CALL PREPROCESSING
 #------------------------------------------------------------------------------
-f_start_date     = '2000-01-01'
-f_endin_date     = '2019-12-31'
-lags_range       = [5]
+prepro_start_date = '2000-01-01'
+prepro_endin_date = '2019-12-31'
+lags_range       = [20]
 
 for lags in lags_range:
     
-    df_preprocessing = mod_preprocessing(df_clean,f_start_date,f_endin_date,lags)
+    df_preprocessing = mod_preprocessing(df_clean,prepro_start_date,prepro_endin_date,lags)
     #print(df_preprocessing)
     
     #CALL PIPELINE
     #------------------------------------------------------------------------------
     n_features = 1
-    endin_data_train  = initn_data_valid  = ['2015-01-01']
-    endin_data_valid  = '2015-12-31'
+    endin_data_train  = initn_data_valid  = ['2018-01-01']
+    endin_data_valid  = '2018-12-31'
     
     print(f"Starts Processing for lags = {lags} and initn_data_valid = {initn_data_valid}")
     print('\n')
@@ -78,7 +80,7 @@ for lags in lags_range:
             
     #LOOPs 2
     #------------------------------------------------------------------------------
-    dropout_range = [0.1,0.2]
+    dropout_range = [0.1]
     neurons_range = [30]
     batch_s_range = [32]
     le_rate_range = [0.001]
@@ -95,7 +97,7 @@ for lags in lags_range:
                     model = Sequential()
                     model.add(SimpleRNN(n_neurons, input_shape=(lags, n_features), return_sequences=True))
                     model.add(Dropout(dropout))
-                    model.add(SimpleRNN(n_neurons))
+                    model.add(SimpleRNN(n_neurons, kernel_regularizer=l2(0.01)))
                     model.add(Dense(1, activation='sigmoid'))
     
                     optimizer = Adam(learning_rate=le_rate)

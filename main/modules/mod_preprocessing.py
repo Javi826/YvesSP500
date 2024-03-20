@@ -7,10 +7,10 @@ Created on Mon Nov  8 22:54:48 2023
 from functions.def_functions import *
 from paths.paths import path_base,folder_preprocessing
 
-def mod_preprocessing (df_clean,f_start_date,f_endin_date,lags):
+def mod_preprocessing (df_clean,prepro_start_date,prepro_endin_date,lags):
     print(f'START MODUL mod_preprocessi')
     
-    df_clean_filter  = filter_data_by_date_range(df_clean, f_start_date, f_endin_date)
+    df_clean_filter  = filter_data_by_date_range(df_clean, prepro_start_date, prepro_endin_date)
     selected_columns =['date','close','returns','direction','momentun','volatility','MA','day_week']
     df_preprocessing = pd.DataFrame(df_clean_filter, columns=selected_columns)
     
@@ -33,7 +33,7 @@ def mod_preprocessing (df_clean,f_start_date,f_endin_date,lags):
     df_plots(df_preprocessing['date'],df_preprocessing['close'],'date','close','lines')
     
     # SAVE Dataframe
-    file_suffix = f"_{str(lags).zfill(2)}_{f_start_date}_{f_endin_date}.xlsx"
+    file_suffix = f"_{str(lags).zfill(2)}_{prepro_start_date}_{prepro_endin_date}.xlsx"
     excel_file_path = os.path.join(path_base, folder_preprocessing, f"df_preprocessing{file_suffix}")
     df_preprocessing.to_excel(excel_file_path, index=False)
     

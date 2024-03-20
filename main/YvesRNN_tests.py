@@ -20,12 +20,12 @@ from modules.mod_pipeline import mod_pipeline
 
 #TEST DATA SELECTION ON PREPROCESSING file
 #------------------------------------------------------------------------------
-lags = 5
+lags = 20
 n_features =1
-start_tests = '2000-01-01'
-endin_tests = '2019-12-31'
+prepro_start_date = '2000-01-01'
+prepro_endin_date = '2019-12-31'
 
-file_suffix = f"_{str(lags).zfill(2)}_{start_tests}_{endin_tests}.xlsx"
+file_suffix = f"_{str(lags).zfill(2)}_{prepro_start_date}_{prepro_endin_date}.xlsx"
 path_preprocessing = os.path.join(path_base, folder_preprocessing, f"df_preprocessing{file_suffix}")
 df_preprocessing = pd.read_excel(path_preprocessing, header=0, skiprows=0)
 #print(df_preprocessing)
@@ -50,9 +50,9 @@ dropout   = 0.1
 n_neurons = 30
 batch_s   = 32
 le_rate   = 0.001
-cutoff_train  = '2017-01-01'
+endin_data_valid  = '2018-12-31'
 
-file_model_name = f'model_lags_{str(lags).zfill(2)}_date_{cutoff_train}_dropout_{dropout}_neurons_{n_neurons}_batch_{batch_s}_lr_{le_rate}.h5'
+file_model_name = f'model_lags_{str(lags).zfill(2)}_date_{endin_data_valid}_dropout_{dropout}_neurons_{n_neurons}_batch_{batch_s}_lr_{le_rate}.h5'
 best_model_path = os.path.join(results_path, file_model_name)
 best_model = load_model(best_model_path)
 
