@@ -13,12 +13,15 @@ from paths.paths import path_preprocessing,path_base,folder_preprocessing,result
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score, confusion_matrix
 from keras.models import load_model
+from modules.mod_dtset_clean import mod_dtset_clean
+from modules.mod_preprocessing import mod_preprocessing
+from modules.mod_pipeline import mod_pipeline
 
 
 #TEST DATA SELECTION ON PREPROCESSING file
 #------------------------------------------------------------------------------
-lags = 20
-features =1
+lags = 5
+n_features =1
 start_tests = '2000-01-01'
 endin_tests = '2019-12-31'
 
@@ -31,24 +34,14 @@ df_date_lag_dir = df_preprocessing[df_columns].copy()
 
 #TESTS DATA SPLIT
 #------------------------------------------------------------------------------    
-start_cutoff_tests  = '2018-01-01'
-endin_cutoff_tests  = '2018-12-31'
-
-tests_data = df_date_lag_dir[(df_date_lag_dir['date'] >= start_cutoff_tests) & (df_date_lag_dir['date'] <= endin_cutoff_tests)]
-lag_columns_selected = [col for col in df_date_lag_dir.columns if col.startswith('lag')]
+initn_data_tests  = ['2018-01-01']
+endin_data_tests  = '2019-12-31'
 
 #X_TEST & y_test | NORMALIZATION + RESHAPE
 #------------------------------------------------------------------------------
-X_df_lag_ts = tests_data[lag_columns_selected]
+X_tests = mod_pipeline(df_preprocessing, initn_data_tests, endin_data_tests,lags, n_features, 'X_tests')
+y_tests = mod_pipeline(df_preprocessing, initn_data_tests, endin_data_tests,lags, n_features, 'y_tests')
 
-scaler_ts = StandardScaler()
-X_df_lag_ts_nr = scaler_ts.fit_transform(X_df_lag_ts)
-X_df_lag_ts_nr = pd.DataFrame(X_df_lag_ts_nr, columns=lag_columns_selected)
-
-X_df_lag_ts_nr_reshaped = X_df_lag_ts_nr.values.reshape(-1, lags, features)
-
-X_tests = X_df_lag_ts_nr_reshaped
-y_tests = tests_data['direction']
 
 #LOAD BEST MODEL
 #------------------------------------------------------------------------------

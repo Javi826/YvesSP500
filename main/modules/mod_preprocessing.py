@@ -6,13 +6,14 @@ Created on Mon Nov  8 22:54:48 2023
 from functions.def_functions import *
 from paths.paths import path_base,folder_preprocessing
 
-def mod_preprocessing (df_data_clean,f_start_date,f_endin_date,lags):
+def mod_preprocessing (df_clean,f_start_date,f_endin_date,lags):
     print(f'START MODUL mod_preprocessi')
-    df_clean_filter  = filter_data_by_date_range(df_data_clean, f_start_date, f_endin_date)
+    
+    df_clean_filter  = filter_data_by_date_range(df_clean, f_start_date, f_endin_date)
     selected_columns =['date','close','returns','direction','momentun','volatility','MA','day_week']
     df_preprocessing = pd.DataFrame(df_clean_filter, columns=selected_columns)
     
-    df_preprocessing['returns']    = np.log(df_data_clean['close'] / df_data_clean['close'].shift(1))  
+    df_preprocessing['returns']    = np.log(df_clean['close'] / df_clean['close'].shift(1))  
     df_preprocessing['direction']  = np.where(df_preprocessing['returns']>0, 1, 0) 
     df_preprocessing['momentun']   = df_preprocessing['returns'].rolling(5).mean().shift(1)
     df_preprocessing['volatility'] = df_preprocessing['returns'].rolling(20).std().shift(1)

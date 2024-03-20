@@ -19,6 +19,7 @@ from columns.columns import columns_csv_yahoo,columns_clean_order
 from functions.def_functions import set_seeds, class_weight,plots_histograms,plot_loss, plot_accu
 from modules.mod_dtset_clean import mod_dtset_clean
 from modules.mod_preprocessing import mod_preprocessing
+from modules.mod_pipeline import mod_pipeline
 
 from pprint import pprint
 from pylab import plt, mpl
@@ -46,152 +47,119 @@ df_data = pd.read_csv(path_file_csv, header=None, skiprows=1, names=columns_csv_
 
 #CALL module Datacleaning
 #------------------------------------------------------------------------------
-df_data_clean = mod_dtset_clean(df_data,start_date,endin_date)
+df_clean = mod_dtset_clean(df_data,start_date,endin_date)
 
-#LOOPs 1
+#CALL PREPROCESSING
 #------------------------------------------------------------------------------
+f_start_date     = '2000-01-01'
+f_endin_date     = '2019-12-31'
+lags_range       = [5]
 
-features =1
-lags_val = [20]
-f_start_date  = '2000-01-01'
-f_endin_date  = '2019-12-31'
+for lags in lags_range:
+    
+    df_preprocessing = mod_preprocessing(df_clean,f_start_date,f_endin_date,lags)
+    #print(df_preprocessing)
+    
+    #CALL PIPELINE
+    #------------------------------------------------------------------------------
+    n_features = 1
+    endin_data_train  = initn_data_valid  = ['2015-01-01']
+    endin_data_valid  = '2015-12-31'
+    
+    X_train = mod_pipeline(df_preprocessing, endin_data_train, endin_data_valid,lags, n_features, 'X_train')
+    y_train = mod_pipeline(df_preprocessing, initn_data_valid, endin_data_valid,lags, n_features, 'y_train')
+    X_valid = mod_pipeline(df_preprocessing, initn_data_valid, endin_data_valid,lags, n_features, 'X_valid')
+    y_valid = mod_pipeline(df_preprocessing, initn_data_valid, endin_data_valid,lags, n_features, 'y_valid')
 
-start_cutoff_valid  = ['2017-01-01']
-endin_cutoff_valid  = '2018-12-31'
-
-df_results = []
-
-for lags in lags_val:
-    for cutoff_train in start_cutoff_valid:
-        print(f"Starts Processing for lags = {lags} and cutoff_train = {cutoff_train}")
-        print('\n')
-        
-        #CALL PREPROCESSING
-        #------------------------------------------------------------------------------
-        df_preprocessing = mod_preprocessing(df_data_clean,f_start_date,f_endin_date,lags)
-        df_columns =['date'] + [col for col in df_preprocessing.columns if col.startswith('lag')] + ['direction']
-        df_date_lag_dir = df_preprocessing[df_columns].copy()
-               
-        #DATA SPLIT
-        #------------------------------------------------------------------------------      
-        train_data = df_date_lag_dir[df_date_lag_dir['date'] <= cutoff_train]
-        valid_data = df_date_lag_dir[(df_date_lag_dir['date'] > cutoff_train) & (df_date_lag_dir['date'] <= endin_cutoff_valid)]
-
-        lag_columns_selected = [col for col in df_date_lag_dir.columns if col.startswith('lag')]
-        
-        #X_TRAIN & y_train | NORMALIZATION + RESHAPE
-        #------------------------------------------------------------------------------
-        X_df_lag_tr = train_data[lag_columns_selected]
-        
-        scaler_tr = StandardScaler()
-        X_df_lag_tr_nr = scaler_tr.fit_transform(X_df_lag_tr)
-        X_df_lag_tr_nr = pd.DataFrame(X_df_lag_tr_nr, columns=lag_columns_selected)
-               
-        X_df_lag_tr_nr_reshaped = X_df_lag_tr_nr.values.reshape(-1, lags, features)
-        
-        X_train = X_df_lag_tr_nr_reshaped
-        y_train = train_data['direction']
-        
-        #X_VALID & y_valid | NORMALIZATION + RESHAPE
-        #------------------------------------------------------------------------------
-        X_df_lag_va = valid_data[lag_columns_selected]
-        
-        scaler_va = StandardScaler()
-        X_df_lag_va_nr = scaler_va.fit_transform(X_df_lag_va)
-        X_df_lag_va_nr = pd.DataFrame(X_df_lag_va_nr, columns=lag_columns_selected)
-        
-        X_df_lag_va_nr_reshaped = X_df_lag_va_nr.values.reshape(-1, lags, features)
-        
-        X_valid = X_df_lag_va_nr_reshaped
-        y_valid = valid_data['direction']
-        
-        #LOOPs 2
-        #------------------------------------------------------------------------------
-        dropout_val = [0.1]
-        neurons_val = [30]
-        batch_s_val = [32]
-        le_rate_val = [0.001]
-        optimizers  = 'adam'
-        #optimizers_to_try = [SGD, RMSprop, Adagrad, Adadelta, Adam, Adamax, Nadam]
-        
-        for dropout in dropout_val:
-            for n_neurons in neurons_val:
-                for batch_s in batch_s_val:
-                    for le_rate in le_rate_val:
-                        print(f"Training model starts for Dropout = {dropout}, Neurons = {n_neurons}, Batch Size = {batch_s}, Learning Rate = {le_rate}, Optimizer = {optimizers}")
-        
-                        set_seeds()
-                        model = Sequential()
-                        model.add(SimpleRNN(n_neurons, input_shape=(lags, features), return_sequences=True))
-                        model.add(Dropout(dropout))
-                        model.add(SimpleRNN(n_neurons))
-                        model.add(Dense(1, activation='sigmoid'))
-        
-                        optimizer = Adam(learning_rate=le_rate)
-                        model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
-
-                        file_model_name = f'model_lags_{str(lags).zfill(2)}_date_{cutoff_train}_dropout_{dropout}_neurons_{n_neurons}_batch_{batch_s}_lr_{le_rate}.h5'
-                        path_h5 = (results_path / file_model_name).as_posix()
-                        
-                        checkpointer = ModelCheckpoint(filepath=path_h5, verbose=0, monitor='val_accuracy',mode='max',save_best_only=True)
-                        early_stopping = EarlyStopping(monitor='loss', patience=15, verbose=1, restore_best_weights=True)
-                        
-                        history = model.fit(X_train, y_train, 
-                                            epochs=20, 
-                                            verbose=0,
-                                            batch_size=batch_s,
-                                            validation_data=(X_valid, y_valid),
-                                            callbacks=[checkpointer, early_stopping])
-                        
-                        accuracy_history = pd.DataFrame(history.history)
-                        #print(accuracy_history)
-                        accuracy_history.index += 1
-                        
-                        # Encontrar la mejor precisión de validación y la época correspondiente
-                        best_accur = accuracy_history['val_accuracy'].max()
-                        best_epoch = accuracy_history['val_accuracy'].idxmax()
-                        
-                        # Imprimir la mejor precisión de validación y la época correspondiente
-                        print(f"Best val_accuracy: {best_accur:.4f}")
-                        print(f"Best epoch: {best_epoch}")
-                     
-                        # Training metrics
-                        train_loss = history.history['loss'][-1]
-                        train_accu = history.history['accuracy'][-1]
-                        valid_loss = history.history['val_loss'][-1]
-                        valid_accu = history.history['val_accuracy'][-1]
-        
-                        df_results.append({
-                            'Lags': lags,
-                            'Cutoff Date': cutoff_train,
-                            'Dropout': dropout,
-                            'Neurons': n_neurons,
-                            'Batch Size': batch_s,
-                            'Learning Rate': le_rate,
-                            'Optimizer': optimizers,
-                            'Train Loss': train_loss,
-                            'Val Loss': valid_loss,
-                            'Train Accu': train_accu,
-                            'Val Accu': valid_accu,
-                            'Best val_accuracy': best_accur,
-                            'Best epoch': best_epoch
-                        })
-
-                        print(f"Training model ending for Dropout = {dropout}, Neurons = {n_neurons}, Batch Size = {batch_s}, Learning Rate = {le_rate}, Optimizer = {optimizers}")
-                        print('\n')
-        
-                        
-                        #plot_loss(history)
-                        #plot_accu(history)
-        
-        print(f"Ending Processing for lags = {lags} and cutoff_train = {cutoff_train}")
-        print('\n')
-        
-df_results_all = pd.DataFrame(df_results)
-
-# Guarda el DataFrame en un archivo Excel
-df_results_all.to_excel('df_results_all.xlsx', index=False)
-print("All results saved in: 'df_results_all.xlsx'")
+    df_results = []
+            
+    #LOOPs 2
+    #------------------------------------------------------------------------------
+    dropout_range = [0.1]
+    neurons_range = [30]
+    batch_s_range = [32]
+    le_rate_range = [0.001]
+    optimizers    = 'adam'
+    #optimizers_to_try = [SGD, RMSprop, Adagrad, Adadelta, Adam, Adamax, Nadam]
+    
+    for dropout in dropout_range:
+        for n_neurons in neurons_range:
+            for batch_s in batch_s_range:
+                for le_rate in le_rate_range:
+                    print(f"Training model starts for Dropout = {dropout}, Neurons = {n_neurons}, Batch Size = {batch_s}, Learning Rate = {le_rate}, Optimizer = {optimizers}")
+    
+                    set_seeds()
+                    model = Sequential()
+                    model.add(SimpleRNN(n_neurons, input_shape=(lags, n_features), return_sequences=True))
+                    model.add(Dropout(dropout))
+                    model.add(SimpleRNN(n_neurons))
+                    model.add(Dense(1, activation='sigmoid'))
+    
+                    optimizer = Adam(learning_rate=le_rate)
+                    model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
+    
+                    file_model_name = f'model_lags_{str(lags).zfill(2)}_date_{endin_data_valid}_dropout_{dropout}_neurons_{n_neurons}_batch_{batch_s}_lr_{le_rate}.h5'
+                    path_h5 = (results_path / file_model_name).as_posix()
+                    
+                    checkpointer = ModelCheckpoint(filepath=path_h5, verbose=0, monitor='val_accuracy',mode='max',save_best_only=True)
+                    early_stopping = EarlyStopping(monitor='loss', patience=15, verbose=1, restore_best_weights=True)
+                    
+                    history = model.fit(X_train, y_train, 
+                                        epochs=20, 
+                                        verbose=0,
+                                        batch_size=batch_s,
+                                        validation_data=(X_valid, y_valid),
+                                        callbacks=[checkpointer, early_stopping])
+                    
+                    accuracy_history = pd.DataFrame(history.history)
+                    #print(accuracy_history)
+                    accuracy_history.index += 1
+                    
+                    # Encontrar la mejor precisión de validación y la época correspondiente
+                    best_accur = accuracy_history['val_accuracy'].max()
+                    best_epoch = accuracy_history['val_accuracy'].idxmax()
+                    
+                    # Imprimir la mejor precisión de validación y la época correspondiente
+                    print(f"Best val_accuracy: {best_accur:.4f}")
+                    print(f"Best epoch: {best_epoch}")
+                 
+                    # Training metrics
+                    train_loss = history.history['loss'][-1]
+                    train_accu = history.history['accuracy'][-1]
+                    valid_loss = history.history['val_loss'][-1]
+                    valid_accu = history.history['val_accuracy'][-1]
+    
+                    df_results.append({
+                        'Lags': lags,
+                        'Cutoff Date': initn_data_valid,
+                        'Dropout': dropout,
+                        'Neurons': n_neurons,
+                        'Batch Size': batch_s,
+                        'Learning Rate': le_rate,
+                        'Optimizer': optimizers,
+                        'Train Loss': train_loss,
+                        'Val Loss': valid_loss,
+                        'Train Accu': train_accu,
+                        'Val Accu': valid_accu,
+                        'Best val_accuracy': best_accur,
+                        'Best epoch': best_epoch
+                    })
+    
+                    print(f"Training model ending for Dropout = {dropout}, Neurons = {n_neurons}, Batch Size = {batch_s}, Learning Rate = {le_rate}, Optimizer = {optimizers}")
+                    print('\n')
+    
+                    
+                    #plot_loss(history)
+                    #plot_accu(history)
+    
+    print(f"Ending Processing for lags = {lags} and initn_data_valid = {initn_data_valid}")
+    print('\n')
+            
+    df_results_all = pd.DataFrame(df_results)
+    
+    # Guarda el DataFrame en un archivo Excel
+    df_results_all.to_excel('df_results_all.xlsx', index=False)
+    print("All results saved in: 'df_results_all.xlsx'")
 
 elapsed_time = time.time() - start_time
 hours, minutes = divmod(elapsed_time, 3600)

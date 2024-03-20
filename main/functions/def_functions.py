@@ -16,61 +16,61 @@ from keras.models import Sequential
 
 lags = 5 
 
-def day_week(df_data_clean):
+def day_week(df_clean):
        
     # column with dates
     date_column = 'date' 
     # ensuring date_column with date format
-    df_data_clean[date_column] = pd.to_datetime(df_data_clean[date_column])
+    df_clean[date_column] = pd.to_datetime(df_clean[date_column])
     # add column day_week + from label to number
-    df_data_clean['day_week'] = df_data_clean[date_column].dt.dayofweek  
+    df_clean['day_week'] = df_clean[date_column].dt.dayofweek  
     
-    return df_data_clean
+    return df_clean
 
 
-def add_index_column(df_data_clean):
+def add_index_column(df_clean):
     
     # add index
-    df_data_clean.insert(0, 'index_id', range(1, len(df_data_clean) + 1))
-    df_data_clean['index_id'] = df_data_clean['index_id'].apply(lambda x: f'{x:05d}')
+    df_clean.insert(0, 'index_id', range(1, len(df_clean) + 1))
+    df_clean['index_id'] = df_clean['index_id'].apply(lambda x: f'{x:05d}')
     
     
-    return df_data_clean
+    return df_clean
 
-def date_anio(df_data_clean):
+def date_anio(df_clean):
     
-    df_data_clean['date'] = pd.to_datetime(df_data_clean['date'])    
+    df_clean['date'] = pd.to_datetime(df_clean['date'])    
     # Extract year
-    df_data_clean['date_anio'] = df_data_clean['date'].dt.year.astype(str).str[:4]
+    df_clean['date_anio'] = df_clean['date'].dt.year.astype(str).str[:4]
     
-    return df_data_clean
+    return df_clean
 
 
-def sort_columns(df_data_clean):
+def sort_columns(df_clean):
 
     desired_column_order = columns_clean_order
     # Ensuure columns in dataframe
-    missing_columns = set(desired_column_order) - set(df_data_clean.columns)
+    missing_columns = set(desired_column_order) - set(df_clean.columns)
     if missing_columns:
         raise ValueError(f"following columns no in DataFrame: {', '.join(missing_columns)}")
 
     # Sort columns
-    df_data_clean = df_data_clean[desired_column_order]
+    df_clean = df_clean[desired_column_order]
     
-    return df_data_clean
+    return df_clean
 
-def rounding_data(df_data_clean):
+def rounding_data(df_clean):
 
     columns_to_round = ['open', 'high', 'low', 'close', 'adj_close']
     # format float
-    df_data_clean[columns_to_round] = df_data_clean[columns_to_round].astype(float)
-    df_data_clean['day_week'] = df_data_clean['day_week'].astype(int)
+    df_clean[columns_to_round] = df_clean[columns_to_round].astype(float)
+    df_clean['day_week'] = df_clean['day_week'].astype(int)
     #format rounding 
     for column in columns_to_round:
-      if column in df_data_clean.columns:
-          df_data_clean[column] = df_data_clean[column].round(4)
+      if column in df_clean.columns:
+          df_clean[column] = df_clean[column].round(4)
             
-    return df_data_clean
+    return df_clean
 
 def filter_data_by_date_range(df, filter_start_date, filter_endin_date):
         
