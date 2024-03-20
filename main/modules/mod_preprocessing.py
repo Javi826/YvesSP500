@@ -1,4 +1,5 @@
-#MODULE_PREPROCESSING
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Created on Mon Nov  8 22:54:48 2023
 @author: javier

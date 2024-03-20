@@ -1,4 +1,5 @@
-#MODULE_PIPELINE
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Created on Mon Nov  8 22:54:48 2023
 @author: javier
@@ -16,13 +17,8 @@ def mod_pipeline(df_preprocessing, initn_date_range, endin_date_range, lags, n_f
     
     X_train, y_train, X_valid, y_valid = None, None, None, None
     
-    lags = lags
-    initn_date_range = initn_date_range
-    endin_date_range = endin_date_range
-    
-    
     for cutoff_date in initn_date_range:
-        print(f"Pipeline for {data_type}: start with lags = {lags}, initn_date_range = {cutoff_date}, endin_date_range = {endin_date_range}")
+        #print(f"Pipeline for {data_type}: start with lags = {lags}, initn_date_range = {cutoff_date}, endin_date_range = {endin_date_range}")
         
         df_columns = ['date'] + [col for col in df_preprocessing.columns if col.startswith('lag')] + ['direction']
         df_date_lag_dir = df_preprocessing[df_columns].copy()
@@ -51,14 +47,14 @@ def mod_pipeline(df_preprocessing, initn_date_range, endin_date_range, lags, n_f
             X_reshaped = X_scaled.values.reshape(-1, lags, n_features)
             X_train = X_reshaped
             
-            print(f"Pipeline for {data_type}: endin with lags = {lags}, initn_date_range = {cutoff_date}, endin_date_range = {endin_date_range}")
+            #print(f"Pipeline for {data_type}: endin with lags = {lags}, initn_date_range = {cutoff_date}, endin_date_range = {endin_date_range}")
 
             return X_train
             
         elif data_type == 'y_train':
             y_train = train_data['direction']
             
-            print(f"Pipeline for {data_type}: endin with lags = {lags}, initn_date_range = {cutoff_date}, endin_date_range = {endin_date_range}")
+            #print(f"Pipeline for {data_type}: endin with lags = {lags}, initn_date_range = {cutoff_date}, endin_date_range = {endin_date_range}")
 
             return y_train
             
@@ -73,14 +69,14 @@ def mod_pipeline(df_preprocessing, initn_date_range, endin_date_range, lags, n_f
             X_reshaped = X_scaled.values.reshape(-1, lags, n_features)
             X_valid = X_reshaped
             
-            print(f"Pipeline for {data_type}: endin with lags = {lags}, initn_date_range = {cutoff_date}, endin_date_range = {endin_date_range}")
+            #print(f"Pipeline for {data_type}: endin with lags = {lags}, initn_date_range = {cutoff_date}, endin_date_range = {endin_date_range}")
 
             return X_valid
         
         elif data_type == 'y_valid':
             y_valid = valid_data['direction']
             
-            print(f"Pipeline for {data_type}: endin with lags = {lags}, initn_date_range = {cutoff_date}, endin_date_range = {endin_date_range}")
+            #print(f"Pipeline for {data_type}: endin with lags = {lags}, initn_date_range = {cutoff_date}, endin_date_range = {endin_date_range}")
 
             return y_valid
         
@@ -92,14 +88,15 @@ def mod_pipeline(df_preprocessing, initn_date_range, endin_date_range, lags, n_f
             X_scaled = scaler.fit_transform(X_data)
             X_scaled = pd.DataFrame(X_scaled, columns=lag_columns_selected)
             X_reshaped = X_scaled.values.reshape(-1, lags, n_features)
-            X_valid = X_reshaped
+            X_tests = X_reshaped
             
-            print(f"Pipeline for {data_type}: endin with lags = {lags}, initn_date_range = {cutoff_date}, endin_date_range = {endin_date_range}")
+            #print(f"Pipeline for {data_type}: endin with lags = {lags}, initn_date_range = {cutoff_date}, endin_date_range = {endin_date_range}")
 
-            return X_valid
+            return X_tests
         
         elif data_type == 'y_tests':
-            y_valid = valid_data['direction']
-            return y_valid
+            y_tests = valid_data['direction']
+            #print(f"Pipeline for {data_type}: endin with lags = {lags}, initn_date_range = {cutoff_date}, endin_date_range = {endin_date_range}")
             
-            print(f"Pipeline for {data_type}: endin with lags = {lags}, initn_date_range = {cutoff_date}, endin_date_range = {endin_date_range}")
+            return y_tests
+            

@@ -14,7 +14,7 @@ import psutil
 import yfinance as yf
 
 from modules.mod_init import *
-from paths.paths import file_df_data,folder_csv,path_file_csv,results_path
+from paths.paths import file_df_data,folder_csv,path_file_csv,results_path,path_tra_val_results,file_tra_val_results, path_base,folder_tra_val_results
 from columns.columns import columns_csv_yahoo,columns_clean_order
 from functions.def_functions import set_seeds, class_weight,plots_histograms,plot_loss, plot_accu
 from modules.mod_dtset_clean import mod_dtset_clean
@@ -66,6 +66,9 @@ for lags in lags_range:
     endin_data_train  = initn_data_valid  = ['2015-01-01']
     endin_data_valid  = '2015-12-31'
     
+    print(f"Starts Processing for lags = {lags} and initn_data_valid = {initn_data_valid}")
+    print('\n')
+    
     X_train = mod_pipeline(df_preprocessing, endin_data_train, endin_data_valid,lags, n_features, 'X_train')
     y_train = mod_pipeline(df_preprocessing, initn_data_valid, endin_data_valid,lags, n_features, 'y_train')
     X_valid = mod_pipeline(df_preprocessing, initn_data_valid, endin_data_valid,lags, n_features, 'X_valid')
@@ -75,7 +78,7 @@ for lags in lags_range:
             
     #LOOPs 2
     #------------------------------------------------------------------------------
-    dropout_range = [0.1]
+    dropout_range = [0.1,0.2]
     neurons_range = [30]
     batch_s_range = [32]
     le_rate_range = [0.001]
@@ -120,8 +123,8 @@ for lags in lags_range:
                     best_epoch = accuracy_history['val_accuracy'].idxmax()
                     
                     # Imprimir la mejor precisión de validación y la época correspondiente
-                    print(f"Best val_accuracy: {best_accur:.4f}")
-                    print(f"Best epoch: {best_epoch}")
+                    #print(f"Best val_accuracy: {best_accur:.4f}")
+                    #print(f"Best epoch: {best_epoch}")
                  
                     # Training metrics
                     train_loss = history.history['loss'][-1]
@@ -152,14 +155,13 @@ for lags in lags_range:
                     #plot_loss(history)
                     #plot_accu(history)
     
-    print(f"Ending Processing for lags = {lags} and initn_data_valid = {initn_data_valid}")
+    print(f"Ending Processing ending for lags = {lags} and initn_data_valid = {initn_data_valid}")
     print('\n')
             
-    df_results_all = pd.DataFrame(df_results)
-    
-    # Guarda el DataFrame en un archivo Excel
-    df_results_all.to_excel('df_results_all.xlsx', index=False)
-    print("All results saved in: 'df_results_all.xlsx'")
+    df_tra_val_results = pd.DataFrame(df_results)
+    excel_file_path = os.path.join(path_base, folder_tra_val_results, f"df_tra_val_all.xlsx")
+    df_tra_val_results.to_excel(excel_file_path, index=False)
+    print("All Training results saved in: 'tra_val_results/df_tra_val_results.xlsx'")
 
 elapsed_time = time.time() - start_time
 hours, minutes = divmod(elapsed_time, 3600)

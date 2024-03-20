@@ -25,8 +25,8 @@ def mod_dtset_clean(df_data,start_date,endin_date):
     # SAVE FILE with start_date and endin_date suffixes
     if not os.path.exists(os.path.join(path_base, folder_df_clean)):os.makedirs(os.path.join(path_base, folder_df_clean))
     file_df_clean = f"df_clean_{start_date}_{endin_date}.csv"
-    save_file_path = os.path.join(path_base, folder_df_clean, file_df_clean)
-    df_clean.to_csv(save_file_path, index=False)
+    excel_file_path = os.path.join(path_base, folder_df_clean, file_df_clean)
+    df_clean.to_csv(excel_file_path, index=False)
     
     print(f'ENDIN MODUL mod_dtset_clean\n')
     return df_clean
