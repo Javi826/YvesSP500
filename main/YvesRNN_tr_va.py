@@ -55,7 +55,7 @@ df_clean = mod_dtset_clean(df_data,start_date,endin_date)
 #------------------------------------------------------------------------------
 prepro_start_date = '2000-01-01'
 prepro_endin_date = '2019-12-31'
-lags_range       = [20]
+lags_range        = [20]
 
 for lags in lags_range:
     
@@ -97,7 +97,7 @@ for lags in lags_range:
                     model = Sequential()
                     model.add(SimpleRNN(n_neurons, input_shape=(lags, n_features), return_sequences=True))
                     model.add(Dropout(dropout))
-                    model.add(SimpleRNN(n_neurons, kernel_regularizer=l2(0.01)))
+                    model.add(SimpleRNN(n_neurons, kernel_regularizer=l2(0.0001)))
                     model.add(Dense(1, activation='sigmoid'))
     
                     optimizer = Adam(learning_rate=le_rate)
@@ -110,7 +110,7 @@ for lags in lags_range:
                     early_stopping = EarlyStopping(monitor='loss', patience=15, verbose=1, restore_best_weights=True)
                     
                     history = model.fit(X_train, y_train, 
-                                        epochs=20, 
+                                        epochs=30, 
                                         verbose=0,
                                         batch_size=batch_s,
                                         validation_data=(X_valid, y_valid),
@@ -125,8 +125,8 @@ for lags in lags_range:
                     best_epoch = accuracy_history['val_accuracy'].idxmax()
                     
                     # Imprimir la mejor precisión de validación y la época correspondiente
-                    #print(f"Best val_accuracy: {best_accur:.4f}")
-                    #print(f"Best epoch: {best_epoch}")
+                    print(f"Best val_accuracy: {best_accur:.4f}")
+                    print(f"Best epoch: {best_epoch}")
                  
                     # Training metrics
                     train_loss = history.history['loss'][-1]
@@ -155,7 +155,7 @@ for lags in lags_range:
     
                     
                     #plot_loss(history)
-                    #plot_accu(history)
+                    plot_accu(history)
     
     print(f"Ending Processing ending for lags = {lags} and initn_data_valid = {initn_data_valid}")
     print('\n')
