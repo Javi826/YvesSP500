@@ -1,4 +1,5 @@
-#PATHS
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Created on Sat Dec 30 21:06:19 2023
 @author: jlahoz
@@ -33,6 +34,9 @@ path_tra_val_results   = os.path.join(path_base, folder_tra_val_results, file_tr
 file_tests_results   = 'df_tests_results.xlsx'
 folder_tests_results = "results/tests_results"
 path_tests_results   = os.path.join(path_base, folder_tests_results, file_tests_results)
+
+folder_tf_serving = "tf_serving"
+tf_serving_path = os.path.join(path_base, folder_tf_serving)
 
 results_path = Path('/Users/javi/Desktop/ML/YvesSP500/file_h5')
 

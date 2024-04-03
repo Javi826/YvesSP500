@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 
-from paths.paths import path_preprocessing,path_base,folder_preprocessing,results_path, path_base, folder_tests_results
+from paths.paths import path_preprocessing,path_base,folder_preprocessing,results_path, path_base, folder_tests_results,tf_serving_path,folder_tf_serving
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score,f1_score,recall_score,precision_score,confusion_matrix,roc_curve, roc_auc_score
 from keras.models import load_model
@@ -33,18 +33,7 @@ df_preprocessing = pd.read_excel(path_preprocessing, header=0, skiprows=0)
 df_columns =['date'] + [col for col in df_preprocessing.columns if col.startswith('lag')] + ['direction']
 df_date_lag_dir = df_preprocessing[df_columns].copy()
 
-#TESTS DATA SPLIT
-#------------------------------------------------------------------------------    
-initn_data_tests  = ['2016-01-01']
-endin_data_tests  = '2016-12-31'
-
-#X_TEST & y_test | NORMALIZATION + RESHAPE
-#------------------------------------------------------------------------------
-X_tests = mod_pipeline(df_preprocessing, initn_data_tests, endin_data_tests,lags, n_features, 'X_tests')
-y_tests = mod_pipeline(df_preprocessing, initn_data_tests, endin_data_tests,lags, n_features, 'y_tests')
-
-
-#LOAD BEST MODEL
+#LOAD BEST MODEL + SAVE MODEL FOR TF SERVING
 #------------------------------------------------------------------------------
 dropout   = 0.1
 n_neurons = 30
@@ -54,7 +43,19 @@ endin_data_valid  = '2018-12-31'
 
 file_model_name = f'model_lags_{str(lags).zfill(2)}_date_{endin_data_valid}_dropout_{dropout}_neurons_{n_neurons}_batch_{batch_s}_lr_{le_rate}.h5'
 best_model_path = os.path.join(results_path, file_model_name)
-best_model = load_model(best_model_path)
+best_model      = load_model(best_model_path)
+
+tf.saved_model.save(best_model, tf_serving_path)
+
+#TESTS DATA SPLIT
+#------------------------------------------------------------------------------    
+initn_data_tests  = ['2010-01-01']
+endin_data_tests  = '2018-12-31'
+
+#X_TEST & y_test | NORMALIZATION + RESHAPE
+#------------------------------------------------------------------------------
+X_tests = mod_pipeline(df_preprocessing, initn_data_tests, endin_data_tests,lags, n_features, 'X_tests')
+y_tests = mod_pipeline(df_preprocessing, initn_data_tests, endin_data_tests,lags, n_features, 'y_tests')
 
 #MODEL PREDICTIONS
 #------------------------------------------------------------------------------
