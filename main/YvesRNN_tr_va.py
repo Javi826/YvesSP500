@@ -21,14 +21,10 @@ from modules.mod_dtset_clean import mod_dtset_clean
 from modules.mod_preprocessing import mod_preprocessing
 from modules.mod_pipeline import mod_pipeline
 
-
-from pprint import pprint
-from pylab import plt, mpl
-
 import tensorflow as tf
 from tensorflow.python.client import device_lib
 from keras.models import Sequential
-from keras.optimizers.legacy import SGD, RMSprop, Adagrad, Adadelta, Adam, Adamax, Nadam
+from keras.optimizers import Adam
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.layers import SimpleRNN, LSTM, Dense, Dropout
 from keras.regularizers import l2
@@ -103,7 +99,7 @@ for lags in lags_range:
                     optimizer = Adam(learning_rate=le_rate)
                     model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
     
-                    file_model_name = f'model_lags_{str(lags).zfill(2)}_date_{endin_data_valid}_dropout_{dropout}_neurons_{n_neurons}_batch_{batch_s}_lr_{le_rate}.h5'
+                    file_model_name = f'model_lags_{str(lags).zfill(2)}_date_{endin_data_valid}_dropout_{dropout}_neurons_{n_neurons}_batch_{batch_s}_lr_{le_rate}.keras'
                     path_h5 = (results_path / file_model_name).as_posix()
                     
                     checkpointer = ModelCheckpoint(filepath=path_h5, verbose=0, monitor='val_accuracy',mode='max',save_best_only=True)

@@ -31,14 +31,14 @@ file_tra_val_results   = 'df_tra_val_results.xlsx'
 folder_tra_val_results = "results/tra_val_results"
 path_tra_val_results   = os.path.join(path_base, folder_tra_val_results, file_tra_val_results)
 
-file_tests_results   = 'df_tests_results.xlsx'
-folder_tests_results = "results/tests_results"
-path_tests_results   = os.path.join(path_base, folder_tests_results, file_tests_results)
+file_tests_results     = 'df_tests_results.xlsx'
+folder_tests_results   = "results/tests_results"
+path_tests_results     = os.path.join(path_base, folder_tests_results, file_tests_results)
 
 folder_tf_serving = "tf_serving"
 tf_serving_path = os.path.join(path_base, folder_tf_serving)
 
-results_path = Path('/Users/javi/Desktop/ML/YvesSP500/file_h5')
+results_path = Path('/Users/javi/Desktop/ML/YvesSP500/keras')
 
 
 
