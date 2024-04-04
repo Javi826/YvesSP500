@@ -41,7 +41,7 @@ batch_s   = 32
 le_rate   = 0.001
 endin_data_valid  = '2018-12-31'
 
-file_model_name = f'model_lags_{str(lags).zfill(2)}_date_{endin_data_valid}_dropout_{dropout}_neurons_{n_neurons}_batch_{batch_s}_lr_{le_rate}.keras'
+file_model_name = f'version01.keras'
 best_model_path = os.path.join(results_path, file_model_name)
 best_model      = load_model(best_model_path)
 

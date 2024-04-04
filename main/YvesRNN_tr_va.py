@@ -99,7 +99,7 @@ for lags in lags_range:
                     optimizer = Adam(learning_rate=le_rate)
                     model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
     
-                    file_model_name = f'model_lags_{str(lags).zfill(2)}_date_{endin_data_valid}_dropout_{dropout}_neurons_{n_neurons}_batch_{batch_s}_lr_{le_rate}.keras'
+                    file_model_name = f'version01.keras'
                     path_h5 = (results_path / file_model_name).as_posix()
                     
                     checkpointer = ModelCheckpoint(filepath=path_h5, verbose=0, monitor='val_accuracy',mode='max',save_best_only=True)
