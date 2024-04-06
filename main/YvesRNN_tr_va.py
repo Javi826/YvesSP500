@@ -100,9 +100,9 @@ for lags in lags_range:
                     model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
     
                     file_model_name = f'version01.keras'
-                    path_h5 = (results_path / file_model_name).as_posix()
+                    path_keras = (results_path / file_model_name).as_posix()
                     
-                    checkpointer = ModelCheckpoint(filepath=path_h5, verbose=0, monitor='val_accuracy',mode='max',save_best_only=True)
+                    checkpointer = ModelCheckpoint(filepath=path_keras, verbose=0, monitor='val_accuracy',mode='max',save_best_only=True)
                     early_stopping = EarlyStopping(monitor='loss', patience=15, verbose=1, restore_best_weights=True)
                     
                     history = model.fit(X_train, y_train, 
